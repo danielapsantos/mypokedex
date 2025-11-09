@@ -10,7 +10,8 @@ import com.bumptech.glide.Glide
 import com.example.mypokedex.model.Pokemon
 
 class PokemonAdapter(
-    private var pokemons: List<Pokemon>
+    private var pokemons: List<Pokemon>,
+    private val onItemClicked: (String) -> Unit
 ) : RecyclerView.Adapter<PokemonAdapter.PokemonViewHolder>() {
 
     class PokemonViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -30,6 +31,10 @@ class PokemonAdapter(
         Glide.with(holder.itemView.context)
             .load(pokemon.imageUrl)
             .into(holder.ivPokemon)
+
+        holder.itemView.setOnClickListener {
+            onItemClicked(pokemon.name)
+        }
     }
     override fun getItemCount(): Int = pokemons.size
 

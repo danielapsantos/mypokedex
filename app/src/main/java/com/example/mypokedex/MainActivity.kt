@@ -1,5 +1,6 @@
 package com.example.mypokedex
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.SearchView
@@ -25,7 +26,11 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.rvPokemons)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = PokemonAdapter(emptyList())
+        adapter = PokemonAdapter(emptyList()) {pokemonName ->
+            val intent = Intent(this, DetailActivity::class.java)
+            intent.putExtra("POKEMON_NAME", pokemonName)
+            startActivity(intent)
+        }
         recyclerView.adapter = adapter
 
         fetchPokemons()
