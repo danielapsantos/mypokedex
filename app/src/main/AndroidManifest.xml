@@ -29,7 +29,8 @@
             android:theme="@style/Theme.MyPokedex" />
         <activity
             android:name=".DetailActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>

@@ -1,14 +1,17 @@
 package com.example.mypokedex
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.mypokedex.model.PokemonDetail
 import com.example.mypokedex.network.RetrofitInstance
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DetailActivity : AppCompatActivity() {
 
@@ -16,28 +19,32 @@ class DetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
 
+        val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbarDetail)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = "Details"
+
         val pokemonName = intent.getStringExtra("POKEMON_NAME")
 
         if (pokemonName != null) {
-            fetchPokemonDetails(pokemonName.lowercase())
+            lifecycleScope.launch {
+                fetchPokemonDetails(pokemonName.lowercase())
+            }
         }
     }
 
-    private fun fetchPokemonDetails(name: String) {
-        RetrofitInstance.api.getPokemonDetail(name).enqueue(object : Callback<PokemonDetail> {
-            override fun onResponse(call: Call<PokemonDetail>, response: Response<PokemonDetail>) {
-                if (response.isSuccessful) {
-                    response.body()?.let { detail ->
-                        bindDetails(detail)
-                    }
-                } else {
-                }
-            }
+    private suspend fun fetchPokemonDetails(name: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                val detail = RetrofitInstance.api.getPokemonDetail(name)
 
-            override fun onFailure(call: Call<PokemonDetail>, t: Throwable) {
-                t.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    bindDetails(detail)
+                }
+            } catch (e: Exception) {
+                Log.e("DetailActivity", "Failed to fetch details for $name: ${e.message}")
             }
-        })
+        }
     }
 
     private fun bindDetails(detail: PokemonDetail) {
